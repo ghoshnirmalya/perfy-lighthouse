@@ -1,17 +1,13 @@
-# use latest version of node
-FROM mhart/alpine-node:latest
+FROM node:10.8.0
 
-# set working directory
-WORKDIR /dist
+RUN mkdir /cron-lighthouse-app
 
-# bundle source code
-COPY . .
+WORKDIR /cron-lighthouse-app
 
-# expose port 3001
-EXPOSE 3001
+ENV PATH /cron-lighthouse-app/node_modules/.bin:$PATH
 
-# install packages
+COPY package.json /cron-lighthouse-app/package.json
+
 RUN yarn install
 
-# start app with yarn
-CMD ["yarn", "start"]
+CMD ["yarn", "dev"]
