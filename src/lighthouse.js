@@ -6,8 +6,12 @@ const util = require("util");
 const ReportGenerator = require("lighthouse/lighthouse-core/report/report-generator");
 const fs = require("fs");
 
-const generate = async () => {
-  const URL = "https://nirmalyaghosh.com/";
+const generate = async (url, projectName) => {
+  console.log("---------------------");
+  console.log(
+    `LH Job started for url: ${url} belonging to project: ${projectName}`
+  );
+
   const opts = {
     chromeFlags: ["--headless", "--no-sandbox"],
     logLevel: "info",
@@ -24,21 +28,32 @@ const generate = async () => {
     `http://localhost:${opts.port}/json/version`
   );
   const { webSocketDebuggerUrl } = JSON.parse(resp.body);
-  const browser = await puppeteer.connect({
-    browserWSEndpoint: webSocketDebuggerUrl
-  });
+  let browser;
+
+  try {
+    browser = await puppeteer.connect({
+      browserWSEndpoint: webSocketDebuggerUrl
+    });
+  } catch (error) {
+    console.log;
+  }
   const page = await browser.newPage();
 
-  await page.goto(URL, {
+  await page.goto(url, {
     waitUntil: "load"
   });
 
   // Run Lighthouse.
-  const results = await lighthouse(URL, opts, null);
+  const results = await lighthouse(url, opts, null);
   const html = ReportGenerator.generateReport(results.lhr, "html");
+  const directoryPath = `./reports/${projectName}`;
+
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath);
+  }
 
   // Save the html in a file
-  fs.writeFile(`./reports/${new Date()}.html`, html, function(err) {
+  fs.writeFile(`${directoryPath}/${new Date()}.html`, html, err => {
     if (err) {
       return console.error(err);
     }
@@ -48,6 +63,11 @@ const generate = async () => {
 
   await browser.disconnect();
   await chrome.kill();
+
+  console.log(
+    `LH Job finished for url: ${url} belonging to project: ${projectName}`
+  );
+  console.log("---------------------");
 };
 
 module.exports = generate;
