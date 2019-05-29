@@ -34,10 +34,7 @@ cron.schedule("30 0-23 * * *", () => {
         console.log(queue.pending);
 
         await queue.start();
-        console.log("############ STARTED ############");
-
         await queue.onEmpty();
-        console.log("############ FINISHED ############");
       });
   });
 });

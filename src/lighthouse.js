@@ -3,11 +3,12 @@ const puppeteer = require("puppeteer");
 const lighthouse = require("lighthouse");
 const request = require("request");
 const util = require("util");
-const ReportGenerator = require("lighthouse/lighthouse-core/report/report-generator");
 const fs = require("fs");
+const { MongoClient } = require("mongodb");
+
+const uri = "mongodb://db:27017/hub";
 
 const generate = async (url, projectName) => {
-  console.log("---------------------");
   console.log(
     `LH Job started for url: ${url} belonging to project: ${projectName}`
   );
@@ -35,7 +36,7 @@ const generate = async (url, projectName) => {
       browserWSEndpoint: webSocketDebuggerUrl
     });
   } catch (error) {
-    console.log;
+    console.log(error);
   }
   const page = await browser.newPage();
 
@@ -45,20 +46,26 @@ const generate = async (url, projectName) => {
 
   // Run Lighthouse.
   const results = await lighthouse(url, opts, null);
-  const html = ReportGenerator.generateReport(results.lhr, "html");
-  const directoryPath = `./reports/${projectName}`;
 
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath);
-  }
+  MongoClient.connect(uri, (err, client) => {
+    if (err) throw err;
 
-  // Save the html in a file
-  fs.writeFile(`${directoryPath}/${new Date()}.html`, html, err => {
-    if (err) {
-      return console.error(err);
-    }
+    const db = client.db("hub");
 
-    console.info("The file was saved!");
+    db.collection("audit").insert({
+      userAgent: results.lhr.userAgent,
+      environment: results.lhr.environment,
+      lighthouseVersion: results.lhr.lighthouseVersion,
+      fetchTime: results.lhr.fetchTime,
+      requestedUrl: results.lhr.requestedUrl,
+      finalUrl: results.lhr.finalUrl,
+      audits: results.lhr.audits,
+      configSettings: results.lhr.configSettings,
+      categories: results.lhr.categories,
+      categoryGroups: results.lhr.categoryGroups,
+      timing: results.lhr.timing,
+      i18n: results.lhr.i18n
+    });
   });
 
   await browser.disconnect();
@@ -67,7 +74,6 @@ const generate = async (url, projectName) => {
   console.log(
     `LH Job finished for url: ${url} belonging to project: ${projectName}`
   );
-  console.log("---------------------");
 };
 
 module.exports = generate;
