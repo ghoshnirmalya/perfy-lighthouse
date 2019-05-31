@@ -8,11 +8,7 @@ const { MongoClient } = require("mongodb");
 
 const uri = "mongodb://db:27017/hub";
 
-const generate = async (url, projectName) => {
-  console.log(
-    `LH Job started for url: ${url} belonging to project: ${projectName}`
-  );
-
+const generate = async url => {
   const opts = {
     chromeFlags: ["--headless", "--no-sandbox"],
     logLevel: "info",
@@ -40,12 +36,12 @@ const generate = async (url, projectName) => {
   }
   const page = await browser.newPage();
 
-  await page.goto(url, {
+  await page.goto(url.link, {
     waitUntil: "load"
   });
 
   // Run Lighthouse.
-  const results = await lighthouse(url, opts, null);
+  const results = await lighthouse(url.link, opts, null);
 
   MongoClient.connect(uri, (err, client) => {
     if (err) throw err;
@@ -64,16 +60,13 @@ const generate = async (url, projectName) => {
       categories: results.lhr.categories,
       categoryGroups: results.lhr.categoryGroups,
       timing: results.lhr.timing,
-      i18n: results.lhr.i18n
+      i18n: results.lhr.i18n,
+      url: url._id
     });
   });
 
   await browser.disconnect();
   await chrome.kill();
-
-  console.log(
-    `LH Job finished for url: ${url} belonging to project: ${projectName}`
-  );
 };
 
 module.exports = generate;

@@ -15,19 +15,17 @@ cron.schedule("30 0-23 * * *", () => {
 
     const db = client.db("hub");
 
-    db.collection("project")
+    db.collection("url")
       .find()
-      .toArray(async (err, projects) => {
+      .toArray(async (err, urls) => {
         if (err) throw err;
 
-        projects.map(project => {
-          if (!project.urls) {
+        urls.map(async url => {
+          if (!url.link) {
             return false;
           }
 
-          project.urls.map(async url => {
-            await queue.add(() => generate(url, project.name));
-          });
+          await queue.add(() => generate(url));
         });
 
         console.log(queue.size);
