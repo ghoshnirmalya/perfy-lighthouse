@@ -12,10 +12,10 @@
     "chrome-launcher": "^0.10.7",
     "express": "^4.17.1",
     "lighthouse": "^5.0.0",
-    "mongodb": "~3.2.6",
     "node-cron": "^2.0.3",
     "nodemon": "^1.19.1",
     "p-queue": "^5.0.0",
+    "pg": "^7.11.0",
     "puppeteer": "^1.17.0",
     "request": "^2.88.0",
     "util": "^0.12.0"

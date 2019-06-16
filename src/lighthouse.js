@@ -4,9 +4,11 @@ const lighthouse = require("lighthouse");
 const request = require("request");
 const util = require("util");
 const fs = require("fs");
-const { MongoClient } = require("mongodb");
+const { Pool } = require("pg");
 
-const uri = "mongodb://db:27017/hub";
+const pool = new Pool({
+  connectionString: "postgres://postgres:@db:5432/postgres"
+});
 
 const generate = async url => {
   const opts = {
@@ -43,30 +45,42 @@ const generate = async url => {
   // Run Lighthouse.
   const results = await lighthouse(url.link, opts, null);
 
-  MongoClient.connect(uri, (err, client) => {
-    if (err) throw err;
+  (async () => {
+    const client = await pool.connect();
 
-    const db = client.db("hub");
+    try {
+      await client.query("BEGIN");
+      await client.query(
+        "INSERT INTO audit(user_agent,environment, lighthouse_version, fetch_time, requested_url, final_url, audits, config_settings, categories, category_groups, timing, i18n, url_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id",
+        [
+          results.lhr.userAgent,
+          results.lhr.environment,
+          results.lhr.lighthouseVersion,
+          results.lhr.fetchTime,
+          results.lhr.requestedUrl,
+          results.lhr.finalUrl,
+          results.lhr.audits,
+          results.lhr.configSettings,
+          results.lhr.categories,
+          results.lhr.categoryGroups,
+          results.lhr.timing,
+          results.lhr.i18n,
+          url.id
+        ]
+      );
 
-    db.collection("audit").insert({
-      userAgent: results.lhr.userAgent,
-      environment: results.lhr.environment,
-      lighthouseVersion: results.lhr.lighthouseVersion,
-      fetchTime: results.lhr.fetchTime,
-      requestedUrl: results.lhr.requestedUrl,
-      finalUrl: results.lhr.finalUrl,
-      audits: results.lhr.audits,
-      configSettings: results.lhr.configSettings,
-      categories: results.lhr.categories,
-      categoryGroups: results.lhr.categoryGroups,
-      timing: results.lhr.timing,
-      i18n: results.lhr.i18n,
-      url: url._id
-    });
-  });
+      await client.query("COMMIT");
+    } catch (e) {
+      await client.query("ROLLBACK");
 
-  await browser.disconnect();
-  await chrome.kill();
+      throw e;
+    } finally {
+      await browser.disconnect();
+      await chrome.kill();
+
+      client.release();
+    }
+  })().catch(e => console.error(e.stack));
 };
 
 module.exports = generate;
