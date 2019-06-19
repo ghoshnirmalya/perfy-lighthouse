@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const chromeLauncher = require("chrome-launcher");
 const puppeteer = require("puppeteer");
 const lighthouse = require("lighthouse");
@@ -7,7 +9,7 @@ const fs = require("fs");
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  connectionString: "postgres://postgres:@db:5432/postgres"
+  connectionString: process.env.DATABASE_URL
 });
 
 const generate = async url => {
