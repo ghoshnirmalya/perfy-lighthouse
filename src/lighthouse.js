@@ -58,59 +58,58 @@ const generate = async url => {
   }
 
   try {
-    // console.log(`page.goto ${url.link}`);
-
-    // await page.goto(url.link, {
-    //   waitUntil: "load"
-    // });
-
     /**
      * Perform authentication and visit the URL
      */
-
     await authenticateAndVisitURL(page, loginURL, delay, url.link);
 
     /**
      * Run Lighthouse
      */
-    const results = await lighthouse(url.link, opts, null);
+    let results;
 
-    (async () => {
-      const client = await pool.connect();
+    try {
+      results = await lighthouse(url.link, opts, null);
 
-      try {
-        await client.query("BEGIN");
-        await client.query(
-          "INSERT INTO audit(user_agent,environment, lighthouse_version, fetch_time, requested_url, final_url, audits, config_settings, categories, category_groups, timing, i18n, url_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id",
-          [
-            results.lhr.userAgent,
-            results.lhr.environment,
-            results.lhr.lighthouseVersion,
-            results.lhr.fetchTime,
-            results.lhr.requestedUrl,
-            results.lhr.finalUrl,
-            results.lhr.audits,
-            results.lhr.configSettings,
-            results.lhr.categories,
-            results.lhr.categoryGroups,
-            results.lhr.timing,
-            results.lhr.i18n,
-            url.id
-          ]
-        );
+      (async () => {
+        const client = await pool.connect();
 
-        await client.query("COMMIT");
-      } catch (e) {
-        await client.query("ROLLBACK");
+        try {
+          await client.query("BEGIN");
+          await client.query(
+            "INSERT INTO audit(user_agent,environment, lighthouse_version, fetch_time, requested_url, final_url, audits, config_settings, categories, category_groups, timing, i18n, url_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id",
+            [
+              results.lhr.userAgent,
+              results.lhr.environment,
+              results.lhr.lighthouseVersion,
+              results.lhr.fetchTime,
+              results.lhr.requestedUrl,
+              results.lhr.finalUrl,
+              results.lhr.audits,
+              results.lhr.configSettings,
+              results.lhr.categories,
+              results.lhr.categoryGroups,
+              results.lhr.timing,
+              results.lhr.i18n,
+              url.id
+            ]
+          );
 
-        throw e;
-      } finally {
-        await browser.disconnect();
-        await chrome.kill();
+          await client.query("COMMIT");
 
-        client.release();
-      }
-    })().catch(e => console.error(e.stack));
+          await client.release();
+        } catch (e) {
+          await client.query("ROLLBACK");
+
+          throw e;
+        }
+      })().catch(e => console.error(e.stack));
+      await browser.disconnect();
+      await chrome.kill();
+    } catch (error) {
+      await browser.disconnect();
+      await chrome.kill();
+    }
   } catch (error) {
     console.log(error);
   }
