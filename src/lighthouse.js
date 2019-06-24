@@ -18,7 +18,7 @@ const generate = async url => {
    * Default configs
    */
   const delay = 5000;
-  const loginURL = "http://dev.ehq.test/login";
+  const loginURL = "https://bulk.hulk.ehqstag.com/login";
   const opts = {
     chromeFlags: ["--headless", "--no-sandbox"],
     logLevel: "info",
