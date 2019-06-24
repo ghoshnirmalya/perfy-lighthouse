@@ -1,4 +1,4 @@
-FROM node:11.1.0
+FROM node:10.13.0
 
 RUN mkdir /cron-lighthouse-app
 
