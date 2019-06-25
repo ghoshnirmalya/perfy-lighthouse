@@ -19,6 +19,7 @@ cron.schedule("* * * * *", () => {
 
     try {
       const res = await client.query("SELECT * FROM url");
+
       const urls = res.rows;
 
       urls.map(async url => {
@@ -26,7 +27,38 @@ cron.schedule("* * * * *", () => {
           return false;
         }
 
-        await queue.add(() => generate(url));
+        try {
+          const projectRes = await client.query(
+            `SELECT * FROM project where id='${url.project_id}'`
+          );
+
+          const {
+            login_url,
+            username_or_email_address_field_selector,
+            username_or_email_address_field_value,
+            password_field_selector,
+            password_field_value,
+            submit_button_selector
+          } = projectRes.rows[0];
+
+          if (login_url) {
+            await queue.add(() =>
+              generate(
+                url,
+                login_url,
+                username_or_email_address_field_selector,
+                username_or_email_address_field_value,
+                password_field_selector,
+                password_field_value,
+                submit_button_selector
+              )
+            );
+          } else {
+            await queue.add(() => generate(url));
+          }
+        } catch (error) {
+          console.log(error);
+        }
       });
 
       console.log(queue.size);

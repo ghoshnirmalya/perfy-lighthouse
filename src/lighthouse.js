@@ -13,7 +13,15 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
 
-const generate = async url => {
+const generate = async (
+  url,
+  login_url,
+  username_or_email_address_field_selector,
+  username_or_email_address_field_value,
+  password_field_selector,
+  password_field_value,
+  submit_button_selector
+) => {
   /**
    * Default configs
    */
@@ -58,10 +66,22 @@ const generate = async url => {
   }
 
   try {
-    /**
-     * Perform authentication and visit the URL
-     */
-    await authenticateAndVisitURL(page, loginURL, delay, url.link);
+    if (login_url) {
+      /**
+       * Perform authentication and visit the URL
+       */
+      await authenticateAndVisitURL(
+        page,
+        delay,
+        url.link,
+        login_url,
+        username_or_email_address_field_selector,
+        username_or_email_address_field_value,
+        password_field_selector,
+        password_field_value,
+        submit_button_selector
+      );
+    }
 
     /**
      * Run Lighthouse
