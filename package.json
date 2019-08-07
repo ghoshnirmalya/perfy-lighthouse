@@ -13,7 +13,7 @@
     "chrome-launcher": "^0.10.7",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
-    "lighthouse": "^5.0.0",
+    "lighthouse": "^5.2.0",
     "node-cron": "^2.0.3",
     "nodemon": "^1.19.1",
     "p-queue": "^5.0.0",
