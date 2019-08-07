@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const cron = require("node-cron");
 const express = require("express");
-const PQueue = require("p-queue");
+const { default: PQueue } = require("p-queue");
 const { Pool } = require("pg");
 
 const generate = require("./lighthouse");
