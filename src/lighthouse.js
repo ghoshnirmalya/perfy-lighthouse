@@ -91,7 +91,7 @@ const generate = async (
     let results
 
     try {
-      results = await lighthouse(url.link, opts, null)
+      results = await lighthouse(url.link, opts, lighthouseConfig)
       ;(async () => {
         const client = await pool.connect()
 
