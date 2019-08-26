@@ -12,6 +12,10 @@ const authenticateAndVisitURL = async (
   /**
    * Authenticate the user to visit an authenticated page
    */
+  await page.setViewport({
+    width: 1280,
+    height: 1024,
+  })
   await page.goto(login_url, { waitUntil: 'load' })
   await page.type(
     username_or_email_address_field_selector,
@@ -22,7 +26,7 @@ const authenticateAndVisitURL = async (
   await page.$eval(submit_button_selector, x => x.click())
   await page.waitFor(delay)
   await page.goto(url, {
-    waitUntil: 'networkidle0',
+    waitUntil: 'load',
   })
   await page.waitFor(delay)
 }
