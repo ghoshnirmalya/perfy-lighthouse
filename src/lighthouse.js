@@ -67,6 +67,13 @@ const generate = async (
     console.log(error)
   }
 
+  page.on('error', error => {
+    console.log('#########ERROR#########')
+    console.log(`ERROR on link ${url.link}`)
+    console.log(error)
+    console.log('#########ERROR#########')
+  })
+
   try {
     if (login_url) {
       /**
@@ -225,12 +232,12 @@ const generate = async (
           throw e
         }
       })().catch(e => console.error(e.stack))
-      await browser.disconnect()
-      // await browser.close();
+      // await browser.disconnect()
+      await browser.close()
       await chrome.kill()
     } catch (error) {
-      await browser.disconnect()
-      // await browser.close();
+      // await browser.disconnect()
+      await browser.close()
       await chrome.kill()
     }
   } catch (error) {
