@@ -13,7 +13,7 @@ const queue = new PQueue({ concurrency: 1, autoStart: false })
 
 app = express()
 
-cron.schedule('30 0-23 * * *', () => {
+cron.schedule('30 12 * * *', () => {
   ;(async () => {
     const client = await pool.connect()
 
