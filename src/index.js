@@ -28,8 +28,8 @@ cron.schedule('30 12 * * *', () => {
         }
 
         try {
-          const projectRes = await client.query(
-            `SELECT * FROM project where id='${url.project_id}'`
+          const siteRes = await client.query(
+            `SELECT * FROM site where id='${url.site_id}'`
           )
 
           const {
@@ -39,7 +39,7 @@ cron.schedule('30 12 * * *', () => {
             password_field_selector,
             password_field_value,
             submit_button_selector,
-          } = projectRes.rows[0]
+          } = siteRes.rows[0]
 
           if (login_url) {
             await queue.add(() =>
