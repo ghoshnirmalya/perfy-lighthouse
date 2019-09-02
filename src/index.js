@@ -13,23 +13,23 @@ const queue = new PQueue({ concurrency: 1, autoStart: false })
 
 app = express()
 
-cron.schedule('30 12 * * *', () => {
+cron.schedule('* * * * *', () => {
   ;(async () => {
     const client = await pool.connect()
 
     try {
-      const res = await client.query('SELECT * FROM url')
+      const res = await client.query('SELECT * FROM page')
 
-      const urls = res.rows
+      const pages = res.rows
 
-      urls.map(async url => {
-        if (!url.link) {
+      pages.map(async page => {
+        if (!page.link) {
           return false
         }
 
         try {
           const siteRes = await client.query(
-            `SELECT * FROM site where id='${url.site_id}'`
+            `SELECT * FROM site where id='${page.site_id}'`
           )
 
           const {
@@ -44,7 +44,7 @@ cron.schedule('30 12 * * *', () => {
           if (login_url) {
             await queue.add(() =>
               generate(
-                url,
+                page,
                 login_url,
                 username_or_email_address_field_selector,
                 username_or_email_address_field_value,
@@ -54,7 +54,7 @@ cron.schedule('30 12 * * *', () => {
               )
             )
           } else {
-            await queue.add(() => generate(url))
+            await queue.add(() => generate(page))
           }
         } catch (error) {
           console.log(error)
