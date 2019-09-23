@@ -28,10 +28,14 @@ const generate = async (
    * Default configs
    */
   const delay = 5000
-  const loginURL = 'https://bulk.hulk.ehqstag.com/login'
   const opts = {
-    chromeFlags: ['--headless', '--no-sandbox'],
-    logLevel: 'info',
+    chromeFlags: [
+      '--headless',
+      '--no-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+    ],
+    logLevel: 'verbose',
     output: 'json',
   }
 
