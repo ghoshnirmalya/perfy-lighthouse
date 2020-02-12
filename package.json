@@ -18,7 +18,7 @@
     "p-queue": "^6.2.1",
     "pg": "^7.18.1",
     "puppeteer": "^2.1.1",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "util": "^0.12.1"
   },
   "devDependencies": {
