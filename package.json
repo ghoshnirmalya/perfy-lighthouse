@@ -15,7 +15,7 @@
     "lighthouse": "^6.1.0",
     "node-cron": "^2.0.3",
     "nodemon": "^2.0.4",
-    "p-queue": "^6.4.0",
+    "p-queue": "^6.5.0",
     "pg": "^8.2.1",
     "puppeteer": "^4.0.1",
     "request": "^2.88.2",
